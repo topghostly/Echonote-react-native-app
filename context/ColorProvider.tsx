@@ -36,7 +36,7 @@ export const useColor = (): colorContextType | any => useContext(ColorContext);
 const lightMode: colorScheme = {
   backgroundColor: "#FBFF62",
   text: "#28282B",
-  primaryOne: "#CCCE4F",
+  primaryOne: "#DEE05A",
   primaryTwo: "#B0B243",
   subtleText: "#949494",
 };

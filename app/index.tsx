@@ -1,10 +1,10 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useColor } from "@/context/ColorProvider";
-
-// Typescript interfaces and types import
-import { colorScheme } from "@/context/ColorProvider";
+import icons from "@/constants/icons";
+import Infolabels from "@/components/Infolabels";
+import AddButton from "@/components/AddButton";
 const index = () => {
   // Collect color values from context
   const { colors, theme, toggleTheme } = useColor();
@@ -17,28 +17,24 @@ const index = () => {
         paddingHorizontal: 10,
       }}
     >
-      <ScrollView style={styles.scrollHolder}>
-        <View style={styles.headerHolder}>
-          <View style={styles.userNameHolder}>
-            <Text
-              style={{
-                color: colors.text,
-                fontFamily: "Causten-Bold",
-                fontSize: 65,
-              }}
-            >
-              Beaver
-            </Text>
-          </View>
-          <View
+      <View style={styles.headerHolder}>
+        <View>
+          <Text
             style={{
-              width: 65,
-              aspectRatio: 1,
-              backgroundColor: colors.text,
-              borderRadius: 200,
-              borderCurve: "continuous",
+              color: colors.text,
+              fontFamily: "Causten-Bold",
+              fontSize: 65,
             }}
-          ></View>
+          >
+            Beaver
+          </Text>
+        </View>
+        <AddButton size={60} />
+      </View>
+      <ScrollView style={styles.scrollHolder}>
+        <View style={styles.infoHolder}>
+          <Infolabels />
+          <Infolabels />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -48,13 +44,18 @@ const index = () => {
 export default index;
 
 const styles = StyleSheet.create({
+  scrollHolder: {
+    paddingTop: 10,
+  },
   headerHolder: {
     width: "100%",
     justifyContent: "space-between",
     flexDirection: "row",
+    paddingVertical: 20,
   },
-  scrollHolder: {
-    paddingTop: 20,
+  infoHolder: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
   },
-  userNameHolder: {},
 });

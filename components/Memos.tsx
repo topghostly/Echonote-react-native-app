@@ -16,6 +16,21 @@ const PlayButton: React.FC = () => {
   );
 };
 
+// The open options components
+const OptionsButton: React.FC = () => {
+  const { colors } = useColor();
+  return (
+    <TouchableOpacity
+      style={{
+        height: 74,
+        aspectRatio: 1,
+        backgroundColor: colors.primaryOne,
+        borderRadius: 100,
+      }}
+    ></TouchableOpacity>
+  );
+};
+
 const Memos: React.FC = () => {
   // Get colors from context
   const { colors } = useColor();
@@ -26,9 +41,14 @@ const Memos: React.FC = () => {
         height: 80,
         borderRadius: 100,
         padding: 3,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
       }}
     >
       <PlayButton />
+      <View></View>
+      <OptionsButton />
     </View>
   );
 };

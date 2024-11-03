@@ -71,6 +71,7 @@ const index = () => {
             <Memos />
             <Memos />
             <Memos />
+            <Memos />
           </View>
         </View>
       </ScrollView>
@@ -84,6 +85,7 @@ const styles = StyleSheet.create({
   scrollHolder: {
     paddingTop: 10,
   },
+
   headerHolder: {
     width: "100%",
     justifyContent: "space-between",
@@ -91,12 +93,14 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 10,
   },
+
   infoHolder: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 10,
     paddingVertical: 15,
   },
+
   memoListHolder: {
     paddingVertical: 15,
   },

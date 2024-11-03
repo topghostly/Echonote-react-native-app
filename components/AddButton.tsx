@@ -3,9 +3,11 @@ import React from "react";
 import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
 
+// Input props interface
 interface buttonType {
   size: number;
 }
+
 const AddButton: React.FC<buttonType> = ({ size }) => {
   // Get our colors from the context
   const { colors } = useColor();

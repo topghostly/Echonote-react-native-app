@@ -27,6 +27,7 @@ const AddButton: React.FC<buttonType> = ({ size }) => {
       <Image
         source={icons.add}
         style={{ tintColor: "white", width: size / 2, height: size / 2 }}
+        resizeMode="contain"
       />
     </TouchableOpacity>
   );

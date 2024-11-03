@@ -47,7 +47,7 @@ const index = () => {
         <View style={styles.memoListHolder}>
           <View
             style={{
-              paddingBottom: 5,
+              paddingBottom: 10,
             }}
           >
             <Text

@@ -1,9 +1,11 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { useColor } from "@/context/ColorProvider";
+import icons from "@/constants/icons";
 
 // The play audio button components
 const PlayButton: React.FC = () => {
+  const { colors } = useColor();
   return (
     <TouchableOpacity
       style={{
@@ -11,8 +13,19 @@ const PlayButton: React.FC = () => {
         aspectRatio: 1,
         backgroundColor: "white",
         borderRadius: 100,
+        justifyContent: "center",
+        alignItems: "center",
       }}
-    ></TouchableOpacity>
+    >
+      <Image
+        source={icons.play}
+        style={{
+          width: 30,
+          height: 30,
+          tintColor: colors.text,
+        }}
+      />
+    </TouchableOpacity>
   );
 };
 
@@ -26,8 +39,19 @@ const OptionsButton: React.FC = () => {
         aspectRatio: 1,
         backgroundColor: colors.primaryOne,
         borderRadius: 100,
+        justifyContent: "center",
+        alignItems: "center",
       }}
-    ></TouchableOpacity>
+    >
+      <Image
+        source={icons.options}
+        style={{
+          width: 30,
+          height: 30,
+          tintColor: colors.text,
+        }}
+      />
+    </TouchableOpacity>
   );
 };
 
@@ -47,7 +71,14 @@ const Memos: React.FC = () => {
       }}
     >
       <PlayButton />
-      <View></View>
+      <View style={styles.infoBlock}>
+        <Text style={styles.memoName} numberOfLines={1}>
+          MEMO_2024557729010930_948949
+        </Text>
+        <Text style={styles.memoDate} numberOfLines={1}>
+          Tuesday, 23 Aug
+        </Text>
+      </View>
       <OptionsButton />
     </View>
   );
@@ -55,4 +86,18 @@ const Memos: React.FC = () => {
 
 export default Memos;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  infoBlock: {
+    flex: 1,
+    padding: 8,
+    gap: 4,
+  },
+  memoName: {
+    color: "white",
+    fontSize: 20,
+    fontFamily: "Causten-SemiBold",
+  },
+  memoDate: {
+    color: "#949494",
+  },
+});

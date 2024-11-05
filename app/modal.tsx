@@ -12,12 +12,30 @@ import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
 import { useState } from "react";
 
+// import recording controls
+import { startRecording, stopRecording } from "@/utilities/handleRecording";
+
 export default function ModalScreen() {
   // Grab color from context provider
   const { colors } = useColor();
 
   // Set state for recording status
   const [isRecording, setIsRecording] = useState<boolean>(false);
+
+  // Handle record button onpress
+
+  const handleRecordFunction = () => {
+    if (isRecording) {
+      stopRecording();
+      setIsRecording(false);
+      console.log("Recording stopped");
+    }
+    if (!isRecording) {
+      startRecording();
+      setIsRecording(true);
+      console.log("Recording started");
+    }
+  };
   return (
     <View
       style={{
@@ -70,18 +88,25 @@ export default function ModalScreen() {
         <View style={styles.playButtonHolder}>
           <TouchableOpacity
             style={{
-              width: 80,
+              width: 90,
               aspectRatio: 1,
               backgroundColor: isRecording ? "red" : "white",
               borderRadius: 1000,
               borderCurve: "continuous",
               justifyContent: "center",
               alignItems: "center",
+              borderWidth: 5,
+              borderColor: colors.primaryOne,
             }}
+            onPress={() => handleRecordFunction()}
           >
             <Image
               source={icons.mic}
-              style={{ tintColor: colors.text, width: 30, height: 30 }}
+              style={{
+                tintColor: isRecording ? "white" : colors.text,
+                width: 25,
+                height: 25,
+              }}
               resizeMode="contain"
             />
           </TouchableOpacity>
@@ -112,9 +137,9 @@ const styles = StyleSheet.create({
   bottomHolder: {
     justifyContent: "center",
     alignItems: "center",
-    height: 80,
+    height: 90,
   },
   playButtonHolder: {
-    width: 80,
+    width: 90,
   },
 });

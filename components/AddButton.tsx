@@ -2,6 +2,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
+import { router } from "expo-router";
 
 // Input props interface
 interface buttonType {
@@ -22,6 +23,9 @@ const AddButton: React.FC<buttonType> = ({ size }) => {
         borderCurve: "continuous",
         justifyContent: "center",
         alignItems: "center",
+      }}
+      onPress={() => {
+        router.push("/modal");
       }}
     >
       <Image

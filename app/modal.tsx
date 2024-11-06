@@ -10,18 +10,23 @@ import {
 } from "react-native";
 import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AudioRecord from "react-native-audio-record";
 import { PermissionsAndroid } from "react-native";
 import { Buffer } from "buffer";
 import * as FileSystem from "expo-file-system";
+import { router } from "expo-router";
 
 export default function ModalScreen() {
   const { colors } = useColor(); // Grab color from context provider
 
+  // Input box ref to get name of file
+  const inputRef = useRef(null);
+
   // Set state for recording status
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [amplitude, setAmplitude] = useState(0); // State to hold amplitude level
+  const [memoUri, setMemoUri] = useState<string>("");
   const [audioName, setAudioName] = useState<String>(() => {
     const randNum = Math.floor(Math.random() * 100000) + 1;
     const newName = "MEMO_" + randNum.toString() + ".wav";
@@ -59,7 +64,6 @@ export default function ModalScreen() {
   // Initialise and configure recording parameter
   useEffect(() => {
     requestMicrophonePermission();
-    console.log("The audio name is: ", audioName);
   }, []);
 
   const AUDIO_FILE_PATH = `${FileSystem.documentDirectory}${audioName}`;
@@ -91,27 +95,36 @@ export default function ModalScreen() {
     }
   };
 
-  useEffect(() => {
-    console.log(amplitude);
-  }, [amplitude]);
-
   const stopRecording = async () => {
     try {
       setIsRecording(false);
       const uri = await AudioRecord.stop(); // Stop recording and get the URI
       console.log("Recording stopped. File URI:", uri);
-
+      setMemoUri(uri);
       // Save the recorded file directly to the desired location
-      await FileSystem.moveAsync({
-        from: uri,
-        to: AUDIO_FILE_PATH, // Move to desired path
-      });
 
-      console.log("Audio file saved at:", AUDIO_FILE_PATH);
       setAmplitude(0);
     } catch (error) {
       console.error("Error stopping recording:", error);
       setAmplitude(0);
+    }
+  };
+
+  // Save and back to home
+  const saveMemo = async () => {
+    if (memoUri) {
+      try {
+        // await FileSystem.moveAsync({
+        //   from: memoUri,
+        //   to: AUDIO_FILE_PATH,
+        // });
+        // console.log("Audio file saved at:", AUDIO_FILE_PATH);
+
+        router.replace("/");
+      } catch (error) {
+        console.log("Error occured while saving, ", error);
+        router.replace("/");
+      }
     }
   };
 
@@ -161,9 +174,9 @@ export default function ModalScreen() {
               justifyContent: "center",
               alignItems: "center",
             }}
-            // onPress={() => {
-            //   router.push("/modal");
-            // }}
+            onPress={() => {
+              saveMemo();
+            }}
           >
             <Image
               source={icons.check}

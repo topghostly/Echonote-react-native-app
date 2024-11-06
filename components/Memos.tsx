@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
 import * as FileSystem from "expo-file-system";
-import Sound from "react-native-sound";
 import { Audio } from "expo-av";
 
 // Interfaces and types
@@ -109,7 +108,6 @@ const Memos: React.FC<itemType> = ({ item }) => {
 
       if (fileInfo.exists) {
         const date = new Date(fileInfo.modificationTime * 1000);
-        console.log(fileInfo.size);
         const lastModifiedDate = date.toLocaleDateString("en-US", {
           weekday: "short",
           month: "short",

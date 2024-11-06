@@ -40,11 +40,33 @@ const index = () => {
     }
   };
 
-  // Get all files on page load
+  // Delete all files
+  // const deleteAllFiles = async () => {
+  //   try {
+  //     // Get the list of all files in the document directory
+  //     const files = await FileSystem.readDirectoryAsync(
+  //       FileSystem.documentDirectory
+  //     );
 
+  //     // Iterate over each file and delete it
+  //     for (const file of files) {
+  //       const filePath = `${FileSystem.documentDirectory}${file}`;
+
+  //       // Delete the file
+  //       await FileSystem.deleteAsync(filePath);
+  //       console.log(`Deleted file: ${filePath}`);
+  //     }
+
+  //     console.log("All files have been deleted.");
+  //   } catch (error) {
+  //     console.error("Error deleting files:", error);
+  //   }
+  // };
+
+  // Get all files on page load
   useEffect(() => {
     fetchRecordings();
-  }, []);
+  });
 
   return (
     <SafeAreaView

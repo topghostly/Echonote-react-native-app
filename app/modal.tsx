@@ -3,7 +3,6 @@ import {
   Image,
   Platform,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
@@ -15,11 +14,10 @@ import { useState, useEffect } from "react";
 import AudioRecord from "react-native-audio-record";
 import { PermissionsAndroid } from "react-native";
 import { Buffer } from "buffer";
-import RNFS from "react-native-fs";
+import * as FileSystem from "expo-file-system";
 
 export default function ModalScreen() {
-  // Grab color from context provider
-  const { colors } = useColor();
+  const { colors } = useColor(); // Grab color from context provider
 
   // Set state for recording status
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -58,11 +56,9 @@ export default function ModalScreen() {
     requestMicrophonePermission();
   }, []);
 
-  useEffect(() => {
-    console.log(amplitude);
-  }, [amplitude]);
+  const AUDIO_FILE_PATH = `${FileSystem.documentDirectory}voice-message.wav`;
 
-  const startRecording = () => {
+  const startRecording = async () => {
     // Configure AudioRecord
     AudioRecord.init({
       sampleRate: 16000, // Audio frequency (adjust as needed)
@@ -82,7 +78,7 @@ export default function ModalScreen() {
     // Start recording logic
     try {
       setIsRecording(true);
-      AudioRecord.start();
+      await AudioRecord.start();
     } catch (error) {
       console.error("Error starting recording:", error);
       setIsRecording(false);
@@ -92,17 +88,12 @@ export default function ModalScreen() {
   const stopRecording = async () => {
     try {
       setIsRecording(false);
-      const uri = AudioRecord.stop();
-      console.log(uri);
-      // const newPath = `${RNFS.DocumentDirectoryPath}/voice-message.wav`;
-
-      // try {
-      //   await RNFS.moveFile(uri, newPath);
-      //   console.log("File moved to:", newPath);
-      // } catch (error) {
-      //   console.error("Error moving file:", error);
-      // }
-      setAmplitude(0); // set amplitude back to 0
+      const uri = await AudioRecord.stop();
+      await FileSystem.writeAsStringAsync(AUDIO_FILE_PATH, uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      console.log("Audio file saved at:", AUDIO_FILE_PATH);
+      setAmplitude(0);
     } catch (error) {
       console.error("Error stopping recording:", error);
       setAmplitude(0);

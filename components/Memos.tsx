@@ -3,6 +3,12 @@ import React from "react";
 import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
 
+// Interfaces and types
+
+interface itemType {
+  item: string;
+}
+
 // The play audio button components
 const PlayButton: React.FC = () => {
   const { colors } = useColor();
@@ -55,9 +61,10 @@ const OptionsButton: React.FC = () => {
   );
 };
 
-const Memos: React.FC = () => {
-  // Get colors from context
-  const { colors } = useColor();
+const Memos: React.FC<itemType> = ({ item }) => {
+  const audioName = item.replace(/\.wav$/, ""); // Remove file extension
+
+  const { colors } = useColor(); // Get colors from context
   return (
     <View
       style={{
@@ -68,12 +75,13 @@ const Memos: React.FC = () => {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
+        marginBottom: 5,
       }}
     >
       <PlayButton />
       <View style={styles.infoBlock}>
         <Text style={styles.memoName} numberOfLines={1}>
-          MEMO_2024557729010930_948949
+          {audioName}
         </Text>
         <Text style={styles.memoDate} numberOfLines={1}>
           Tuesday, 23 Aug
@@ -96,6 +104,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 20,
     fontFamily: "Causten-SemiBold",
+    textTransform: "uppercase",
   },
   memoDate: {
     color: "#949494",

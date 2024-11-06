@@ -4,6 +4,7 @@ import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
 import * as FileSystem from "expo-file-system";
 import Sound from "react-native-sound";
+import { Audio } from "expo-av";
 
 // Interfaces and types
 interface itemType {
@@ -16,27 +17,34 @@ interface playType {
 // The play audio button components
 const PlayButton: React.FC<playType> = ({ fileUri }) => {
   const { colors } = useColor();
+  const [sound, setSound] = useState<Audio.Sound | null>(null); // State to hold sound object
 
   useEffect(() => {
-    Sound.setCategory("Playback"); // Set sound environment
-  }, []);
+    // Cleanup sound when the component is unmounted
+    return () => {
+      if (sound) {
+        sound.unloadAsync(); // Unload sound to free resources
+      }
+    };
+  }, [sound]);
 
   const playMemo = async () => {
-    console.log("Started play function");
+    try {
+      const { sound: playbackObject } = await Audio.Sound.createAsync(
+        { uri: fileUri },
+        { shouldPlay: true }
+      );
+      setSound(playbackObject); // Set the sound object to state
 
-    const sound = new Sound(fileUri, Sound.DOCUMENT, (error) => {
-      if (error) return console.log("Memo playback failed", error);
-
-      sound.play((success) => {
-        if (success) {
-          console.log("Playing Memo");
-        } else {
-          console.log("Error playing Memo");
+      console.log("Playing Memo");
+      playbackObject.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) {
+          console.log("Memo playback finished");
         }
-
-        sound.release();
       });
-    });
+    } catch (error) {
+      console.log("Error playing Memo", error);
+    }
   };
   return (
     <TouchableOpacity
@@ -101,6 +109,7 @@ const Memos: React.FC<itemType> = ({ item }) => {
 
       if (fileInfo.exists) {
         const date = new Date(fileInfo.modificationTime * 1000);
+        console.log(fileInfo.size);
         const lastModifiedDate = date.toLocaleDateString("en-US", {
           weekday: "short",
           month: "short",

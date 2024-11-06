@@ -91,21 +91,28 @@ export default function ModalScreen() {
     }
   };
 
+  useEffect(() => {
+    console.log(amplitude);
+  }, [amplitude]);
+
   const stopRecording = async () => {
     try {
       setIsRecording(false);
-      const uri = await AudioRecord.stop();
-      const base64Audio = Buffer.from(uri, "binary").toString("base64"); // Convert to base64 format
-      await FileSystem.writeAsStringAsync(AUDIO_FILE_PATH, base64Audio, {
-        encoding: FileSystem.EncodingType.Base64,
+      const uri = await AudioRecord.stop(); // Stop recording and get the URI
+      console.log("Recording stopped. File URI:", uri);
+
+      // Save the recorded file directly to the desired location
+      await FileSystem.moveAsync({
+        from: uri,
+        to: AUDIO_FILE_PATH, // Move to desired path
       });
+
       console.log("Audio file saved at:", AUDIO_FILE_PATH);
       setAmplitude(0);
     } catch (error) {
       console.error("Error stopping recording:", error);
       setAmplitude(0);
     }
-    setAmplitude(0);
   };
 
   // Handle record button onpress

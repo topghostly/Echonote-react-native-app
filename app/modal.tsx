@@ -22,7 +22,12 @@ export default function ModalScreen() {
   // Set state for recording status
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [amplitude, setAmplitude] = useState(0); // State to hold amplitude level
-
+  const [audioName, setAudioName] = useState<String>(() => {
+    const randNum = Math.floor(Math.random() * 100000) + 1;
+    const newName = "MEMO_" + randNum.toString() + ".wav";
+    console.log(newName);
+    return newName;
+  });
   // Calculate the amplitude from the buffer
   const calculateAmplitude = (buffer: any) => {
     let sum = 0;
@@ -54,9 +59,10 @@ export default function ModalScreen() {
   // Initialise and configure recording parameter
   useEffect(() => {
     requestMicrophonePermission();
+    console.log("The audio name is: ", audioName);
   }, []);
 
-  const AUDIO_FILE_PATH = `${FileSystem.documentDirectory}voice-message.wav`;
+  const AUDIO_FILE_PATH = `${FileSystem.documentDirectory}${audioName}`;
 
   const startRecording = async () => {
     // Configure AudioRecord
@@ -65,7 +71,7 @@ export default function ModalScreen() {
       channels: 1, // Mono channel
       bitsPerSample: 16,
       audioSource: 6, // Microphone
-      wavFile: "temp-voice-message.wav",
+      wavFile: `${audioName}`,
     });
 
     // Listener for real-time data
@@ -89,7 +95,8 @@ export default function ModalScreen() {
     try {
       setIsRecording(false);
       const uri = await AudioRecord.stop();
-      await FileSystem.writeAsStringAsync(AUDIO_FILE_PATH, uri, {
+      const base64Audio = Buffer.from(uri, "binary").toString("base64"); // Convert to base64 format
+      await FileSystem.writeAsStringAsync(AUDIO_FILE_PATH, base64Audio, {
         encoding: FileSystem.EncodingType.Base64,
       });
       console.log("Audio file saved at:", AUDIO_FILE_PATH);

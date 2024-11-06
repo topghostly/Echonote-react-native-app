@@ -1,17 +1,43 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
+import * as FileSystem from "expo-file-system";
+import Sound from "react-native-sound";
 
 // Interfaces and types
-
 interface itemType {
   item: string;
 }
+interface playType {
+  fileUri: string;
+}
 
 // The play audio button components
-const PlayButton: React.FC = () => {
+const PlayButton: React.FC<playType> = ({ fileUri }) => {
   const { colors } = useColor();
+
+  useEffect(() => {
+    Sound.setCategory("Playback"); // Set sound environment
+  }, []);
+
+  const playMemo = async () => {
+    console.log("Started play function");
+
+    const sound = new Sound(fileUri, Sound.DOCUMENT, (error) => {
+      if (error) return console.log("Memo playback failed", error);
+
+      sound.play((success) => {
+        if (success) {
+          console.log("Playing Memo");
+        } else {
+          console.log("Error playing Memo");
+        }
+
+        sound.release();
+      });
+    });
+  };
   return (
     <TouchableOpacity
       style={{
@@ -22,6 +48,7 @@ const PlayButton: React.FC = () => {
         justifyContent: "center",
         alignItems: "center",
       }}
+      onPress={playMemo}
     >
       <Image
         source={icons.play}
@@ -62,6 +89,35 @@ const OptionsButton: React.FC = () => {
 };
 
 const Memos: React.FC<itemType> = ({ item }) => {
+  const [craetedOn, setCreatedOn] = useState<string | Date>();
+
+  // File storage uri
+  const fileUri = `${FileSystem.documentDirectory}${item}`;
+
+  // Get audio file details
+  const getFileDetails = async () => {
+    try {
+      const fileInfo = await FileSystem.getInfoAsync(fileUri);
+
+      if (fileInfo.exists) {
+        const date = new Date(fileInfo.modificationTime * 1000);
+        const lastModifiedDate = date.toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        });
+        setCreatedOn(lastModifiedDate);
+      }
+    } catch (error) {
+      console.warn(error);
+    }
+  };
+
+  //Get file details on page load
+  useEffect(() => {
+    getFileDetails();
+  }, []);
+
   const audioName = item.replace(/\.wav$/, ""); // Remove file extension
 
   const { colors } = useColor(); // Get colors from context
@@ -78,13 +134,13 @@ const Memos: React.FC<itemType> = ({ item }) => {
         marginBottom: 5,
       }}
     >
-      <PlayButton />
+      <PlayButton fileUri={fileUri} />
       <View style={styles.infoBlock}>
         <Text style={styles.memoName} numberOfLines={1}>
           {audioName}
         </Text>
         <Text style={styles.memoDate} numberOfLines={1}>
-          Tuesday, 23 Aug
+          {craetedOn?.toString()}
         </Text>
       </View>
       <OptionsButton />

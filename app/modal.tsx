@@ -7,13 +7,15 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  SafeAreaView,
 } from "react-native";
 import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
-import { useState } from "react";
-
-// import recording controls
-import { startRecording, stopRecording } from "@/utilities/handleRecording";
+import { useState, useEffect } from "react";
+import AudioRecord from "react-native-audio-record";
+import { PermissionsAndroid } from "react-native";
+import { Buffer } from "buffer";
+import RNFS from "react-native-fs";
 
 export default function ModalScreen() {
   // Grab color from context provider
@@ -21,27 +23,111 @@ export default function ModalScreen() {
 
   // Set state for recording status
   const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [amplitude, setAmplitude] = useState(0); // State to hold amplitude level
+
+  // Calculate the amplitude from the buffer
+  const calculateAmplitude = (buffer: any) => {
+    let sum = 0;
+    for (let i = 0; i < buffer.length; i += 2) {
+      const value = buffer.readInt16LE(i);
+      sum += Math.abs(value);
+    }
+    return sum / (buffer.length / 2); // Average amplitude
+  };
+
+  // Request for permission to use the mocrophone
+  const requestMicrophonePermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        {
+          title: "Microphone Permission",
+          message: "This app needs access to your microphone to record audio.",
+          buttonPositive: "OK",
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  };
+
+  // Initialise and configure recording parameter
+  useEffect(() => {
+    requestMicrophonePermission();
+  }, []);
+
+  useEffect(() => {
+    console.log(amplitude);
+  }, [amplitude]);
+
+  const startRecording = () => {
+    // Configure AudioRecord
+    AudioRecord.init({
+      sampleRate: 16000, // Audio frequency (adjust as needed)
+      channels: 1, // Mono channel
+      bitsPerSample: 16,
+      audioSource: 6, // Microphone
+      wavFile: "temp-voice-message.wav",
+    });
+
+    // Listener for real-time data
+    AudioRecord.on("data", (data) => {
+      const buffer = Buffer.from(data, "base64");
+      const currentAmplitude = calculateAmplitude(buffer);
+      setAmplitude(currentAmplitude); // Update amplitude level
+    });
+
+    // Start recording logic
+    try {
+      setIsRecording(true);
+      AudioRecord.start();
+    } catch (error) {
+      console.error("Error starting recording:", error);
+      setIsRecording(false);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      setIsRecording(false);
+      const uri = AudioRecord.stop();
+      console.log(uri);
+      // const newPath = `${RNFS.DocumentDirectoryPath}/voice-message.wav`;
+
+      // try {
+      //   await RNFS.moveFile(uri, newPath);
+      //   console.log("File moved to:", newPath);
+      // } catch (error) {
+      //   console.error("Error moving file:", error);
+      // }
+      setAmplitude(0); // set amplitude back to 0
+    } catch (error) {
+      console.error("Error stopping recording:", error);
+      setAmplitude(0);
+    }
+    setAmplitude(0);
+  };
 
   // Handle record button onpress
-
   const handleRecordFunction = () => {
     if (isRecording) {
       stopRecording();
-      setIsRecording(false);
       console.log("Recording stopped");
     }
     if (!isRecording) {
       startRecording();
-      setIsRecording(true);
       console.log("Recording started");
     }
   };
   return (
-    <View
+    <SafeAreaView
       style={{
         flex: 1,
         backgroundColor: colors.backgroundColor,
         padding: 10,
+        paddingTop: 20,
         justifyContent: "space-between",
       }}
     >
@@ -114,7 +200,7 @@ export default function ModalScreen() {
       </View>
       {/* Use a light status bar on iOS to account for the black space above the modal */}
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
-    </View>
+    </SafeAreaView>
   );
 }
 

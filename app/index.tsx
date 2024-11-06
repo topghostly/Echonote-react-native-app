@@ -72,6 +72,9 @@ const index = () => {
             <Memos />
             <Memos />
             <Memos />
+            <Memos />
+            <Memos />
+            <Memos />
           </View>
         </View>
       </ScrollView>

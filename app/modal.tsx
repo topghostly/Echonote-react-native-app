@@ -66,7 +66,7 @@ export default function ModalScreen() {
     requestMicrophonePermission();
   }, []);
 
-  const AUDIO_FILE_PATH = `${FileSystem.documentDirectory}${audioName}`;
+  const AUDIO_FILE_PATH = `${FileSystem.documentDirectory}/new/filename.wav`;
 
   const startRecording = async () => {
     // Configure AudioRecord
@@ -114,11 +114,11 @@ export default function ModalScreen() {
   const saveMemo = async () => {
     if (memoUri) {
       try {
-        // await FileSystem.moveAsync({
-        //   from: memoUri,
-        //   to: AUDIO_FILE_PATH,
-        // });
-        // console.log("Audio file saved at:", AUDIO_FILE_PATH);
+        await FileSystem.copyAsync({
+          from: "/data/user/0/com.bossbeaver.EchoNote/files/MEMO_89207.wav",
+          to: AUDIO_FILE_PATH,
+        });
+        console.log("Audio file saved at:", AUDIO_FILE_PATH);
 
         router.replace("/");
       } catch (error) {
@@ -145,14 +145,14 @@ export default function ModalScreen() {
         flex: 1,
         backgroundColor: colors.backgroundColor,
         padding: 10,
-        paddingTop: 20,
+        paddingTop: 50,
         justifyContent: "space-between",
       }}
     >
       {/* Header part */}
       <View style={styles.headerContainer}>
         {/* Memo name input  */}
-        <View style={styles.nameInputContainer}>
+        {/* <View style={styles.nameInputContainer}>
           <TextInput
             style={{
               flex: 1,
@@ -162,11 +162,11 @@ export default function ModalScreen() {
             }}
             placeholder="Untitled Memo"
           />
-        </View>
+        </View> */}
         <View style={styles.submitButtonHolder}>
           <TouchableOpacity
             style={{
-              width: 50,
+              width: 80,
               aspectRatio: 1,
               backgroundColor: colors.text,
               borderRadius: 1000,
@@ -175,12 +175,12 @@ export default function ModalScreen() {
               alignItems: "center",
             }}
             onPress={() => {
-              saveMemo();
+              router.replace("/");
             }}
           >
             <Image
               source={icons.check}
-              style={{ tintColor: "white", width: 15, height: 15 }}
+              style={{ tintColor: "white", width: 20, height: 20 }}
               resizeMode="contain"
             />
           </TouchableOpacity>
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     paddingVertical: 15,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
   },
   nameInputContainer: {
     height: 50,
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   submitButtonHolder: {
-    width: 50,
+    width: 80,
   },
 
   // Bottom Styles

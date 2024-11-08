@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 // import the context files
 import { ColorProvider } from "@/context/ColorProvider";
+import { UtilProvider } from "@/context/utilProvider";
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
@@ -43,13 +44,15 @@ export default function RootLayout() {
 function RootLayoutNav() {
   return (
     <ColorProvider>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: "modal", headerShown: false }}
-        />
-      </Stack>
+      <UtilProvider>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="modal"
+            options={{ presentation: "modal", headerShown: false }}
+          />
+        </Stack>
+      </UtilProvider>
     </ColorProvider>
   );
 }

@@ -4,7 +4,7 @@ import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
 import * as FileSystem from "expo-file-system";
 import { Audio, AVPlaybackStatus, AVPlaybackStatusSuccess } from "expo-av";
-
+import { useUtil } from "@/context/utilProvider";
 // Interfaces and types
 interface itemType {
   item: string;
@@ -21,10 +21,10 @@ const PlayButton: React.FC<playType> = ({
   setDuration,
   setPosition,
 }) => {
+  const { isPlaying, updateIsPlaying } = useUtil();
   const { colors } = useColor();
   const [sound, setSound] = useState<Audio.Sound | null>(null); // State to hold sound object
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-
+  const [currentPlaying, setIsCurrentPlaying] = useState<boolean>(false);
   useEffect(() => {
     // Cleanup sound when the component is unmounted
     return () => {
@@ -40,7 +40,8 @@ const PlayButton: React.FC<playType> = ({
         { uri: fileUri },
         { shouldPlay: true }
       );
-      setIsPlaying(true);
+      updateIsPlaying(true);
+      setIsCurrentPlaying(true);
       setSound(playbackObject); // Set the sound object to state
       playbackObject.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
@@ -50,7 +51,8 @@ const PlayButton: React.FC<playType> = ({
         // Check if memo playback has ended
         if (status && (status as AVPlaybackStatusSuccess).didJustFinish) {
           console.log("Memo playback finished");
-          setIsPlaying(false);
+          updateIsPlaying(false);
+          setIsCurrentPlaying(false);
         }
       });
     } catch (error) {
@@ -66,7 +68,8 @@ const PlayButton: React.FC<playType> = ({
       if (sound && isPlaying) {
         // Check if sound is playing
         await sound.pauseAsync();
-        setIsPlaying(false); // Update state to indicate sound is paused
+        setIsCurrentPlaying(false);
+        updateIsPlaying(false); // Update state to indicate sound is paused
       }
     } catch (error) {
       console.log("Error pausing Memo", error);
@@ -85,7 +88,7 @@ const PlayButton: React.FC<playType> = ({
       onPress={isPlaying ? stopMemo : playMemo}
     >
       <Image
-        source={isPlaying ? icons.stopPlay : icons.play}
+        source={currentPlaying ? icons.stopPlay : icons.play}
         style={{
           width: 30,
           height: 30,
@@ -157,6 +160,7 @@ const Memos: React.FC<itemType> = ({ item }) => {
   const audioName = item.replace(/\.wav$/, ""); // Remove file extension
 
   const { colors } = useColor(); // Get colors from context
+  const { isPlaying, updateIsPlaying } = useUtil();
   return (
     <View
       style={{

@@ -26,7 +26,7 @@ export default function ModalScreen() {
   // Set state for recording status
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [amplitude, setAmplitude] = useState(0); // State to hold amplitude level
-  const [memoUri, setMemoUri] = useState<string>("");
+  const [amplitudeArray, setAmplitudeArray] = useState<number[]>([]);
   const [audioName, setAudioName] = useState<String>(() => {
     const randNum = Math.floor(Math.random() * 100000) + 1;
     const newName = "MEMO_" + randNum.toString() + ".wav";
@@ -66,7 +66,21 @@ export default function ModalScreen() {
     requestMicrophonePermission();
   }, []);
 
-  const AUDIO_FILE_PATH = `${FileSystem.documentDirectory}/new/filename.wav`;
+  // const AUDIO_FILE_PATH = `${FileSystem.documentDirectory}/new/filename.wav`;
+  const filteredAmplitude: number[] = [];
+
+  // Normalise Audio outut amplitude
+  function normalize(
+    value: number,
+    min = 0,
+    max = 35000,
+    targetMin = 1,
+    targetMax = 100
+  ) {
+    const mappedValue =
+      targetMin + ((value - min) / (max - min)) * (targetMax - targetMin);
+    return Math.round(mappedValue * 100) / 100; // Rounds to 2 decimal places
+  }
 
   const startRecording = async () => {
     // Configure AudioRecord
@@ -81,8 +95,8 @@ export default function ModalScreen() {
     // Listener for real-time data
     AudioRecord.on("data", (data) => {
       const buffer = Buffer.from(data, "base64");
-      const currentAmplitude = calculateAmplitude(buffer);
-      setAmplitude(currentAmplitude); // Update amplitude level
+      const currentAmplitude = calculateAmplitude(buffer) * 2;
+      isRecording && setAmplitude(normalize(currentAmplitude)); // Update amplitude level
     });
 
     // Start recording logic
@@ -95,15 +109,18 @@ export default function ModalScreen() {
     }
   };
 
+  useEffect(() => {
+    console.log(amplitude);
+    setAmplitudeArray((prev) => [...prev, amplitude]);
+  }, [amplitude]);
+
   const stopRecording = async () => {
     try {
       setIsRecording(false);
-      const uri = await AudioRecord.stop(); // Stop recording and get the URI
+      const uri = await AudioRecord.stop(); // Stop recording and store the uri
       console.log("Recording stopped. File URI:", uri);
-      setMemoUri(uri);
-      // Save the recorded file directly to the desired location
-
       setAmplitude(0);
+      console.log(amplitudeArray);
     } catch (error) {
       console.error("Error stopping recording:", error);
       setAmplitude(0);
@@ -111,27 +128,29 @@ export default function ModalScreen() {
   };
 
   // Save and back to home
-  const saveMemo = async () => {
-    if (memoUri) {
-      try {
-        await FileSystem.copyAsync({
-          from: "/data/user/0/com.bossbeaver.EchoNote/files/MEMO_89207.wav",
-          to: AUDIO_FILE_PATH,
-        });
-        console.log("Audio file saved at:", AUDIO_FILE_PATH);
+  // const saveMemo = async () => {
+  //   if (memoUri) {
+  //     try {
+  //       await FileSystem.copyAsync({
+  //         from: "/data/user/0/com.bossbeaver.EchoNote/files/MEMO_89207.wav",
+  //         to: AUDIO_FILE_PATH,
+  //       });
+  //       console.log("Audio file saved at:", AUDIO_FILE_PATH);
 
-        router.replace("/");
-      } catch (error) {
-        console.log("Error occured while saving, ", error);
-        router.replace("/");
-      }
-    }
-  };
+  //       router.replace("/");
+  //     } catch (error) {
+  //       console.log("Error occured while saving, ", error);
+  //       router.replace("/");
+  //     }
+  //   }
+  // };
 
   // Handle record button onpress
+
   const handleRecordFunction = () => {
     if (isRecording) {
       stopRecording();
+      console.log(filteredAmplitude);
       console.log("Recording stopped");
     }
     if (!isRecording) {
@@ -151,18 +170,6 @@ export default function ModalScreen() {
     >
       {/* Header part */}
       <View style={styles.headerContainer}>
-        {/* Memo name input  */}
-        {/* <View style={styles.nameInputContainer}>
-          <TextInput
-            style={{
-              flex: 1,
-              fontFamily: "Causten-SemiBold",
-              fontSize: 25,
-              color: colors.primaryTwo,
-            }}
-            placeholder="Untitled Memo"
-          />
-        </View> */}
         <View style={styles.submitButtonHolder}>
           <TouchableOpacity
             style={{
@@ -185,6 +192,42 @@ export default function ModalScreen() {
             />
           </TouchableOpacity>
         </View>
+      </View>
+
+      {/* Mid setion */}
+      <View style={styles.counterHolder}>
+        <View
+          style={{
+            width: 70,
+            borderRadius: 80,
+            height: 200,
+            backgroundColor: colors.primaryOne,
+          }}
+        />
+        <View
+          style={{
+            width: 70,
+            borderRadius: 80,
+            height: 50,
+            backgroundColor: colors.primaryOne,
+          }}
+        />
+        <View
+          style={{
+            width: 70,
+            borderRadius: 80,
+            height: 50,
+            backgroundColor: colors.primaryOne,
+          }}
+        />
+        <View
+          style={{
+            width: 70,
+            borderRadius: 80,
+            height: 100,
+            backgroundColor: colors.primaryOne,
+          }}
+        />
       </View>
 
       {/* Bottom part */}
@@ -245,5 +288,13 @@ const styles = StyleSheet.create({
   },
   playButtonHolder: {
     width: 90,
+  },
+  counterHolder: {
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 5,
   },
 });

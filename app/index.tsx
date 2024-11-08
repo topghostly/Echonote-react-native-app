@@ -14,6 +14,8 @@ import Infolabels from "@/components/Infolabels";
 import AddButton from "@/components/AddButton";
 import Memos from "@/components/Memos";
 import * as FileSystem from "expo-file-system";
+import ModalScreen from "@/components/ModalScreen";
+
 const index = () => {
   // Collect color values from context
   const { colors, theme, toggleTheme } = useColor();
@@ -41,27 +43,27 @@ const index = () => {
   };
 
   // Delete all files
-  const deleteAllFiles = async () => {
-    try {
-      // Get the list of all files in the document directory
-      const files = await FileSystem.readDirectoryAsync(
-        FileSystem.documentDirectory
-      );
+  // const deleteAllFiles = async () => {
+  //   try {
+  //     // Get the list of all files in the document directory
+  //     const files = await FileSystem.readDirectoryAsync(
+  //       FileSystem.documentDirectory
+  //     );
 
-      // Iterate over each file and delete it
-      for (const file of files) {
-        const filePath = `${FileSystem.documentDirectory}${file}`;
+  //     // Iterate over each file and delete it
+  //     for (const file of files) {
+  //       const filePath = `${FileSystem.documentDirectory}${file}`;
 
-        // Delete the file
-        await FileSystem.deleteAsync(filePath);
-        console.log(`Deleted file: ${filePath}`);
-      }
+  //       // Delete the file
+  //       await FileSystem.deleteAsync(filePath);
+  //       console.log(`Deleted file: ${filePath}`);
+  //     }
 
-      console.log("All files have been deleted.");
-    } catch (error) {
-      console.error("Error deleting files:", error);
-    }
-  };
+  //     console.log("All files have been deleted.");
+  //   } catch (error) {
+  //     console.error("Error deleting files:", error);
+  //   }
+  // };
 
   // Get all files on page load
   useEffect(() => {
@@ -126,6 +128,10 @@ const index = () => {
           </>
         )}
       />
+      {/* Modal screen logic */}
+      {/* {showModalScreen && (
+        <ModalScreen setShowModalScreen={setShowModalScreen} />
+      )} */}
     </SafeAreaView>
   );
 };

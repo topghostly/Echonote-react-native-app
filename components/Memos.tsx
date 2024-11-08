@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
 import * as FileSystem from "expo-file-system";
-import { Audio } from "expo-av";
+import { Audio, AVPlaybackStatus, AVPlaybackStatusSuccess } from "expo-av";
 
 // Interfaces and types
 interface itemType {
@@ -37,7 +37,7 @@ const PlayButton: React.FC<playType> = ({ fileUri }) => {
 
       console.log("Playing Memo");
       playbackObject.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
+        if (status && (status as AVPlaybackStatusSuccess).didJustFinish) {
           console.log("Memo playback finished");
         }
       });
@@ -108,7 +108,6 @@ const Memos: React.FC<itemType> = ({ item }) => {
 
       if (fileInfo.exists) {
         const date = new Date(fileInfo.modificationTime * 1000);
-        console.log(fileInfo.size);
         const lastModifiedDate = date.toLocaleDateString("en-US", {
           weekday: "short",
           month: "short",

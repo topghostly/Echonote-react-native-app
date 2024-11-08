@@ -93,6 +93,9 @@ export default function ModalScreen() {
   }, 300);
 
   const startRecording = async () => {
+    setAmplitudeArray([]);
+    setAmplitude(5);
+    setCounterArray([5, 5, 5, 5]);
     // Configure AudioRecord
     AudioRecord.init({
       sampleRate: 16000, // Audio frequency (adjust as needed)
@@ -246,6 +249,10 @@ export default function ModalScreen() {
       </View>
 
       {/* Mid setion */}
+
+      {/*  */}
+      {/* Add requestAnimationFrame logic here  */}
+      {/*  */}
       <View style={styles.counterHolder}>
         <Animated.View
           style={[

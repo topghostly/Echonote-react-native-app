@@ -11,12 +11,19 @@ interface itemType {
 }
 interface playType {
   fileUri: string;
+  setDuration: any;
+  setPosition: any;
 }
 
 // The play audio button components
-const PlayButton: React.FC<playType> = ({ fileUri }) => {
+const PlayButton: React.FC<playType> = ({
+  fileUri,
+  setDuration,
+  setPosition,
+}) => {
   const { colors } = useColor();
   const [sound, setSound] = useState<Audio.Sound | null>(null); // State to hold sound object
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   useEffect(() => {
     // Cleanup sound when the component is unmounted
@@ -33,16 +40,36 @@ const PlayButton: React.FC<playType> = ({ fileUri }) => {
         { uri: fileUri },
         { shouldPlay: true }
       );
+      setIsPlaying(true);
       setSound(playbackObject); // Set the sound object to state
-
-      console.log("Playing Memo");
       playbackObject.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded) {
+          setDuration(status.durationMillis);
+          setPosition(status.positionMillis);
+        }
+        // Check if memo playback has ended
         if (status && (status as AVPlaybackStatusSuccess).didJustFinish) {
           console.log("Memo playback finished");
+          setIsPlaying(false);
         }
       });
     } catch (error) {
       console.log("Error playing Memo", error);
+    }
+  };
+
+  // function to stop memo
+  const stopMemo = async () => {
+    console.log("Paused pressed");
+    try {
+      console.log("Paused pressed");
+      if (sound && isPlaying) {
+        // Check if sound is playing
+        await sound.pauseAsync();
+        setIsPlaying(false); // Update state to indicate sound is paused
+      }
+    } catch (error) {
+      console.log("Error pausing Memo", error);
     }
   };
   return (
@@ -55,10 +82,10 @@ const PlayButton: React.FC<playType> = ({ fileUri }) => {
         justifyContent: "center",
         alignItems: "center",
       }}
-      onPress={playMemo}
+      onPress={isPlaying ? stopMemo : playMemo}
     >
       <Image
-        source={icons.play}
+        source={isPlaying ? icons.stopPlay : icons.play}
         style={{
           width: 30,
           height: 30,
@@ -97,6 +124,8 @@ const OptionsButton: React.FC = () => {
 
 const Memos: React.FC<itemType> = ({ item }) => {
   const [craetedOn, setCreatedOn] = useState<string | Date>();
+  const [duration, setDuration] = useState<number | undefined>(0);
+  const [position, setPosition] = useState<number>(0);
 
   // File storage uri
   const fileUri = `${FileSystem.documentDirectory}${item}`;
@@ -141,7 +170,11 @@ const Memos: React.FC<itemType> = ({ item }) => {
         marginBottom: 5,
       }}
     >
-      <PlayButton fileUri={fileUri} />
+      <PlayButton
+        fileUri={fileUri}
+        setDuration={setDuration}
+        setPosition={setPosition}
+      />
       <View style={styles.infoBlock}>
         <Text style={styles.memoName} numberOfLines={1}>
           {audioName}

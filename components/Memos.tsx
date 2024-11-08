@@ -108,6 +108,7 @@ const Memos: React.FC<itemType> = ({ item }) => {
 
       if (fileInfo.exists) {
         const date = new Date(fileInfo.modificationTime * 1000);
+        console.log(fileInfo.size);
         const lastModifiedDate = date.toLocaleDateString("en-US", {
           weekday: "short",
           month: "short",

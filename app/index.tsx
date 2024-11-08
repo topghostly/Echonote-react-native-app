@@ -20,7 +20,7 @@ const index = () => {
 
   // Update all avialable recordings
   const [recordings, setRecordings] = useState<string[]>([]);
-  const [actualRecordings, setActualRecordings] = useState<string[]>([]);
+  const [showModalScreen, setShowModalScreen] = useState<boolean>(false);
 
   // Function to fetch and list recordings
   const fetchRecordings = async () => {
@@ -41,31 +41,32 @@ const index = () => {
   };
 
   // Delete all files
-  // const deleteAllFiles = async () => {
-  //   try {
-  //     // Get the list of all files in the document directory
-  //     const files = await FileSystem.readDirectoryAsync(
-  //       FileSystem.documentDirectory
-  //     );
+  const deleteAllFiles = async () => {
+    try {
+      // Get the list of all files in the document directory
+      const files = await FileSystem.readDirectoryAsync(
+        FileSystem.documentDirectory
+      );
 
-  //     // Iterate over each file and delete it
-  //     for (const file of files) {
-  //       const filePath = `${FileSystem.documentDirectory}${file}`;
+      // Iterate over each file and delete it
+      for (const file of files) {
+        const filePath = `${FileSystem.documentDirectory}${file}`;
 
-  //       // Delete the file
-  //       await FileSystem.deleteAsync(filePath);
-  //       console.log(`Deleted file: ${filePath}`);
-  //     }
+        // Delete the file
+        await FileSystem.deleteAsync(filePath);
+        console.log(`Deleted file: ${filePath}`);
+      }
 
-  //     console.log("All files have been deleted.");
-  //   } catch (error) {
-  //     console.error("Error deleting files:", error);
-  //   }
-  // };
+      console.log("All files have been deleted.");
+    } catch (error) {
+      console.error("Error deleting files:", error);
+    }
+  };
 
   // Get all files on page load
   useEffect(() => {
     fetchRecordings();
+    // deleteAllFiles();
   });
 
   return (
@@ -99,10 +100,13 @@ const index = () => {
         }}
         keyExtractor={(item) => item}
         renderItem={({ item }) => <Memos item={item} />}
-        ListHeaderComponent={() => (
+        ListHeaderComponent={(item) => (
           <>
             <View style={styles.infoHolder}>
-              <Infolabels info="Total saved voice memo" amount={7} />
+              <Infolabels
+                info="Total saved voice memo"
+                amount={recordings.length}
+              />
               <Infolabels info="Total favorite voice memo" amount={0} />
             </View>
             <View

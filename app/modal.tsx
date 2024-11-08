@@ -14,8 +14,14 @@ import { useState, useEffect, useRef } from "react";
 import AudioRecord from "react-native-audio-record";
 import { PermissionsAndroid } from "react-native";
 import { Buffer } from "buffer";
-import * as FileSystem from "expo-file-system";
+// import * as FileSystem from "expo-file-system";
 import { router } from "expo-router";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+import { throttle } from "lodash";
 
 export default function ModalScreen() {
   const { colors } = useColor(); // Grab color from context provider
@@ -25,8 +31,9 @@ export default function ModalScreen() {
 
   // Set state for recording status
   const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [amplitude, setAmplitude] = useState(0); // State to hold amplitude level
+  const [amplitude, setAmplitude] = useState(5); // State to hold amplitude level
   const [amplitudeArray, setAmplitudeArray] = useState<number[]>([]);
+  const [counterArray, setCounterArray] = useState<number[]>([5, 5, 5, 5]);
   const [audioName, setAudioName] = useState<String>(() => {
     const randNum = Math.floor(Math.random() * 100000) + 1;
     const newName = "MEMO_" + randNum.toString() + ".wav";
@@ -67,20 +74,23 @@ export default function ModalScreen() {
   }, []);
 
   // const AUDIO_FILE_PATH = `${FileSystem.documentDirectory}/new/filename.wav`;
-  const filteredAmplitude: number[] = [];
 
   // Normalise Audio outut amplitude
-  function normalize(
+  const normalize = (
     value: number,
     min = 0,
     max = 35000,
-    targetMin = 1,
-    targetMax = 100
-  ) {
-    const mappedValue =
-      targetMin + ((value - min) / (max - min)) * (targetMax - targetMin);
-    return Math.round(mappedValue * 100) / 100; // Rounds to 2 decimal places
-  }
+    newMin = 5,
+    newMax = 150
+  ) => {
+    return Math.round(
+      ((value - min) / (max - min)) * (newMax - newMin) + newMin
+    );
+  };
+
+  const updateAmplituedThrottled = throttle((currentAmplitude: number) => {
+    setAmplitude(currentAmplitude);
+  }, 300);
 
   const startRecording = async () => {
     // Configure AudioRecord
@@ -95,8 +105,8 @@ export default function ModalScreen() {
     // Listener for real-time data
     AudioRecord.on("data", (data) => {
       const buffer = Buffer.from(data, "base64");
-      const currentAmplitude = calculateAmplitude(buffer) * 2;
-      isRecording && setAmplitude(normalize(currentAmplitude)); // Update amplitude level
+      const currentAmplitude = calculateAmplitude(buffer);
+      updateAmplituedThrottled(normalize(currentAmplitude));
     });
 
     // Start recording logic
@@ -108,23 +118,63 @@ export default function ModalScreen() {
       setIsRecording(false);
     }
   };
-
+  const animatedHeight1 = useSharedValue(5); // animation height default value
+  const animatedHeight2 = useSharedValue(5); // animation height default value
+  const animatedHeight3 = useSharedValue(5); // animation height default value
+  const animatedHeight4 = useSharedValue(5); // animation height default value
   useEffect(() => {
-    console.log(amplitude);
+    animatedHeight1.value = withTiming(counterArray[0], { duration: 200 });
+    animatedHeight2.value = withTiming(counterArray[1], { duration: 200 });
+    animatedHeight3.value = withTiming(counterArray[2], { duration: 200 });
+    animatedHeight4.value = withTiming(counterArray[3], { duration: 200 });
+
+    // Update the amplitude array for playback
     setAmplitudeArray((prev) => [...prev, amplitude]);
+
+    // Update amplitude for counters
+    setCounterArray((prev) => {
+      const newArray = [...prev, amplitude];
+      return newArray.length > 4 ? newArray.slice(1) : newArray;
+    });
   }, [amplitude]);
 
+  // Animation style fuction
+  const animatedStyle1 = useAnimatedStyle(() => {
+    return {
+      height: animatedHeight1.value,
+    };
+  });
+  const animatedStyle2 = useAnimatedStyle(() => {
+    return {
+      height: animatedHeight2.value,
+    };
+  });
+  const animatedStyle3 = useAnimatedStyle(() => {
+    return {
+      height: animatedHeight3.value,
+    };
+  });
+  const animatedStyle4 = useAnimatedStyle(() => {
+    return {
+      height: animatedHeight4.value,
+    };
+  });
+
+  // Function to stop recording
   const stopRecording = async () => {
     try {
       setIsRecording(false);
       const uri = await AudioRecord.stop(); // Stop recording and store the uri
       console.log("Recording stopped. File URI:", uri);
-      setAmplitude(0);
+      setAmplitude(5);
+      setCounterArray([5, 5, 5, 5]);
       console.log(amplitudeArray);
     } catch (error) {
       console.error("Error stopping recording:", error);
-      setAmplitude(0);
+      setAmplitude(5);
+      setCounterArray([5, 5, 5, 5]);
     }
+    setCounterArray([5, 5, 5, 5]);
   };
 
   // Save and back to home
@@ -150,7 +200,7 @@ export default function ModalScreen() {
   const handleRecordFunction = () => {
     if (isRecording) {
       stopRecording();
-      console.log(filteredAmplitude);
+      setCounterArray([5, 5, 5, 5]);
       console.log("Recording stopped");
     }
     if (!isRecording) {
@@ -158,6 +208,7 @@ export default function ModalScreen() {
       console.log("Recording started");
     }
   };
+
   return (
     <SafeAreaView
       style={{
@@ -196,37 +247,45 @@ export default function ModalScreen() {
 
       {/* Mid setion */}
       <View style={styles.counterHolder}>
-        <View
-          style={{
-            width: 70,
-            borderRadius: 80,
-            height: 200,
-            backgroundColor: colors.primaryOne,
-          }}
+        <Animated.View
+          style={[
+            {
+              width: 70,
+              borderRadius: 80,
+              backgroundColor: colors.primaryOne,
+            },
+            animatedStyle1,
+          ]}
         />
-        <View
-          style={{
-            width: 70,
-            borderRadius: 80,
-            height: 50,
-            backgroundColor: colors.primaryOne,
-          }}
+        <Animated.View
+          style={[
+            {
+              width: 70,
+              borderRadius: 80,
+              backgroundColor: colors.primaryOne,
+            },
+            animatedStyle3,
+          ]}
         />
-        <View
-          style={{
-            width: 70,
-            borderRadius: 80,
-            height: 50,
-            backgroundColor: colors.primaryOne,
-          }}
+        <Animated.View
+          style={[
+            {
+              width: 70,
+              borderRadius: 80,
+              backgroundColor: colors.primaryOne,
+            },
+            animatedStyle2,
+          ]}
         />
-        <View
-          style={{
-            width: 70,
-            borderRadius: 80,
-            height: 100,
-            backgroundColor: colors.primaryOne,
-          }}
+        <Animated.View
+          style={[
+            {
+              width: 70,
+              borderRadius: 80,
+              backgroundColor: colors.primaryOne,
+            },
+            animatedStyle4,
+          ]}
         />
       </View>
 

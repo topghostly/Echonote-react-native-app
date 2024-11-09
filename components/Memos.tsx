@@ -4,7 +4,13 @@ import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
 import * as FileSystem from "expo-file-system";
 import { Audio, AVPlaybackStatus, AVPlaybackStatusSuccess } from "expo-av";
-import { useUtil } from "@/context/utilProvider";
+import { useUtil } from "@/context/UtilProvider";
+
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 // Interfaces and types
 interface itemType {
   item: string;
@@ -13,6 +19,8 @@ interface playType {
   fileUri: string;
   setDuration: any;
   setPosition: any;
+  currentPlaying: any;
+  setIsCurrentPlaying: any;
 }
 
 // The play audio button components
@@ -20,11 +28,12 @@ const PlayButton: React.FC<playType> = ({
   fileUri,
   setDuration,
   setPosition,
+  currentPlaying,
+  setIsCurrentPlaying,
 }) => {
   const { isPlaying, updateIsPlaying } = useUtil();
   const { colors } = useColor();
   const [sound, setSound] = useState<Audio.Sound | null>(null); // State to hold sound object
-  const [currentPlaying, setIsCurrentPlaying] = useState<boolean>(false);
   useEffect(() => {
     // Cleanup sound when the component is unmounted
     return () => {
@@ -62,9 +71,7 @@ const PlayButton: React.FC<playType> = ({
 
   // function to stop memo
   const stopMemo = async () => {
-    console.log("Paused pressed");
     try {
-      console.log("Paused pressed");
       if (sound && isPlaying) {
         // Check if sound is playing
         await sound.pauseAsync();
@@ -127,8 +134,9 @@ const OptionsButton: React.FC = () => {
 
 const Memos: React.FC<itemType> = ({ item }) => {
   const [craetedOn, setCreatedOn] = useState<string | Date>();
-  const [duration, setDuration] = useState<number | undefined>(0);
+  const [duration, setDuration] = useState<number | null>(0);
   const [position, setPosition] = useState<number>(0);
+  const [currentPlaying, setIsCurrentPlaying] = useState<boolean>(false);
 
   // File storage uri
   const fileUri = `${FileSystem.documentDirectory}${item}`;
@@ -157,10 +165,33 @@ const Memos: React.FC<itemType> = ({ item }) => {
     getFileDetails();
   }, []);
 
+  const normalizeToRange = (normalizingFactor: any, testValue: number) => {
+    const maxRange = 200;
+    if (!normalizingFactor || isNaN(testValue)) return 0; // Add this to prevent NaN
+    const normalizedValue = (testValue / normalizingFactor) * maxRange;
+    return Math.min(normalizedValue, maxRange);
+  };
+
   const audioName = item.replace(/\.wav$/, ""); // Remove file extension
 
   const { colors } = useColor(); // Get colors from context
   const { isPlaying, updateIsPlaying } = useUtil();
+
+  // Playback progress animation logic
+  const progressPosition = useSharedValue(0);
+
+  useEffect(() => {
+    const newPosition = normalizeToRange(duration, position);
+    if (!isNaN(newPosition)) {
+      progressPosition.value = withTiming(newPosition, { duration: 500 });
+    }
+  }, [position, duration]);
+
+  const progressStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: progressPosition.value || 0 }],
+    };
+  });
   return (
     <View
       style={{
@@ -178,14 +209,35 @@ const Memos: React.FC<itemType> = ({ item }) => {
         fileUri={fileUri}
         setDuration={setDuration}
         setPosition={setPosition}
+        currentPlaying={currentPlaying}
+        setIsCurrentPlaying={setIsCurrentPlaying}
       />
       <View style={styles.infoBlock}>
-        <Text style={styles.memoName} numberOfLines={1}>
-          {audioName}
-        </Text>
-        <Text style={styles.memoDate} numberOfLines={1}>
-          {craetedOn?.toString()}
-        </Text>
+        {currentPlaying ? (
+          // Logic for play progress
+          <View style={styles.progressHolder}>
+            <Animated.View
+              style={[
+                {
+                  width: 10,
+                  height: 10,
+                  backgroundColor: "white",
+                  borderRadius: 100,
+                },
+                progressStyle,
+              ]}
+            />
+          </View>
+        ) : (
+          <View>
+            <Text style={styles.memoName} numberOfLines={1}>
+              {audioName}
+            </Text>
+            <Text style={styles.memoDate} numberOfLines={1}>
+              {craetedOn?.toString()}
+            </Text>
+          </View>
+        )}
       </View>
       <OptionsButton />
     </View>
@@ -208,5 +260,11 @@ const styles = StyleSheet.create({
   },
   memoDate: {
     color: "#949494",
+  },
+  progressHolder: {
+    width: 200,
+    height: 20,
+    backgroundColor: "red",
+    justifyContent: "center",
   },
 });

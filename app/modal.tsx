@@ -185,12 +185,59 @@ export default function ModalScreen() {
     }
   };
 
+  const reduceToThirty = (array: number[]) => {
+    console.log("Reducing");
+    let index = 1; // Start by removing the second element
+    while (array.length > 30) {
+      array.splice(index, 1); // Remove the element at the current index
+      index++; // Move to the next element (third, fourth, etc.)
+      if (index >= array.length) {
+        // Reset index to 1 if it goes out of bounds
+        index = 1;
+      }
+    }
+    return array;
+  };
+
+  const expandToThirty = (array: number[]) => {
+    console.log("increasing");
+    let index = 0; // Start with the first element
+    while (array.length < 30) {
+      array.splice(index + 1, 0, array[index]); // Insert a duplicate of the current element
+      index = index + 2; // Move to the next element to replicate
+      if (index >= array.length) {
+        // Reset index to 0 if it goes out of bounds
+        index = 0;
+      }
+    }
+    return array;
+  };
+
+  // Normalise amplitude array
+  const normaliseArray = (amplitudeArray: number[]) => {
+    console.log(amplitudeArray.length);
+    let normalisedArray: number[] = [];
+    if (amplitudeArray.length > 30) {
+      console.log("Reducing");
+      normalisedArray = reduceToThirty(amplitudeArray);
+    } else if (amplitudeArray.length < 30) {
+      console.log("Increasing");
+      normalisedArray = expandToThirty(amplitudeArray);
+    } else if (amplitudeArray.length === 30) {
+      console.log("Leaving as is");
+      normalisedArray = amplitudeArray;
+    }
+
+    return normalisedArray;
+  };
+
   // Function to stop recording
   const stopRecording = async () => {
     try {
       setIsRecording(false);
       const uri = await AudioRecord.stop(); // Stop recording and store the uri
-      await handleAsyncDataStorage(amplitudeArray);
+      const newArray = normaliseArray(amplitudeArray);
+      await handleAsyncDataStorage(newArray);
       console.log("Recording stopped. File URI:", uri);
       setAmplitude(5);
       setCounterArray([5, 5, 5, 5]);

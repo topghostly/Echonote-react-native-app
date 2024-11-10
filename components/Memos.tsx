@@ -1,11 +1,18 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
 import * as FileSystem from "expo-file-system";
 import { Audio, AVPlaybackStatus, AVPlaybackStatusSuccess } from "expo-av";
 import { useUtil } from "@/context/UtilProvider";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -137,6 +144,7 @@ const Memos: React.FC<itemType> = ({ item }) => {
   const [duration, setDuration] = useState<number | null>(0);
   const [position, setPosition] = useState<number>(0);
   const [currentPlaying, setIsCurrentPlaying] = useState<boolean>(false);
+  const [amplitude, setAmplitude] = useState<number[]>([]);
 
   // File storage uri
   const fileUri = `${FileSystem.documentDirectory}${item}`;
@@ -160,9 +168,29 @@ const Memos: React.FC<itemType> = ({ item }) => {
     }
   };
 
+  // Get amplitude details
+
+  const getAsyncDate = async () => {
+    try {
+      const jsonData = await AsyncStorage.getItem(`memo_${item}`);
+
+      if (jsonData != null) {
+        const memoData = JSON.parse(jsonData);
+        console.log(memoData);
+        setAmplitude(memoData);
+      } else {
+        console.log("No data found");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Couuld not hey amplitude details");
+      console.error(error);
+    }
+  };
+
   //Get file details on page load
   useEffect(() => {
     getFileDetails();
+    // getAsyncDate();
   }, []);
 
   const normalizeToRange = (normalizingFactor: any, testValue: number) => {
@@ -176,6 +204,10 @@ const Memos: React.FC<itemType> = ({ item }) => {
 
   const { colors } = useColor(); // Get colors from context
   const { isPlaying, updateIsPlaying } = useUtil();
+
+  // Create amplitude rectangles
+
+  const ampRect = Array.from({ length: 30 });
 
   // Playback progress animation logic
   const progressPosition = useSharedValue(0);
@@ -213,10 +245,10 @@ const Memos: React.FC<itemType> = ({ item }) => {
         setIsCurrentPlaying={setIsCurrentPlaying}
       />
       <View style={styles.infoBlock}>
-        {currentPlaying ? (
+        {!currentPlaying ? (
           // Logic for play progress
           <View style={styles.progressHolder}>
-            <Animated.View
+            {/* <Animated.View
               style={[
                 {
                   width: 10,
@@ -226,7 +258,18 @@ const Memos: React.FC<itemType> = ({ item }) => {
                 },
                 progressStyle,
               ]}
-            />
+            /> */}
+            {ampRect.map((rabd, index) => (
+              <View
+                key={index}
+                style={{
+                  width: 3,
+                  height: 30,
+                  backgroundColor: "white",
+                  borderRadius: 100,
+                }}
+              />
+            ))}
           </View>
         ) : (
           <View>
@@ -264,7 +307,8 @@ const styles = StyleSheet.create({
   progressHolder: {
     width: 200,
     height: 20,
-    backgroundColor: "red",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    flexDirection: "row",
+    alignItems: "center",
   },
 });

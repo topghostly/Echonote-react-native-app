@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, TouchableOpacity, Text } from "react-native";
 import React from "react";
 import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
@@ -23,6 +23,7 @@ const AddButton: React.FC<buttonType> = ({ size }) => {
         borderCurve: "continuous",
         justifyContent: "center",
         alignItems: "center",
+        zIndex: 10,
       }}
       onPress={() => {
         router.push("/modal");
@@ -38,5 +39,3 @@ const AddButton: React.FC<buttonType> = ({ size }) => {
 };
 
 export default AddButton;
-
-const styles = StyleSheet.create({});

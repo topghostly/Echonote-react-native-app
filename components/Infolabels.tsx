@@ -37,6 +37,7 @@ const Infolabels: React.FC<infoType> = ({ info, amount }) => {
             fontSize: 16,
             flex: 1,
           }}
+          onPress={() => console.log("press")}
         >
           {info}
         </Text>

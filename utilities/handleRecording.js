@@ -27,7 +27,7 @@ export const startRecording = () => {
     channels: 1,
     bitsPerSample: 16,
     audioSource: 6,
-    wavFile: fileName(),
+    wavFile: "test.wav",
   });
 
   // Start the recording

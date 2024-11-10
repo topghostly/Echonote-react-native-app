@@ -1,14 +1,79 @@
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { memo, useEffect, useMemo } from "react";
+import {
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import React, { memo, useEffect, useMemo, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useColor } from "@/context/ColorProvider";
-import icons from "@/constants/icons";
 import Infolabels from "@/components/Infolabels";
 import AddButton from "@/components/AddButton";
 import Memos from "@/components/Memos";
+import * as FileSystem from "expo-file-system";
+import ModalScreen from "@/components/ModalScreen";
+
 const index = () => {
   // Collect color values from context
   const { colors, theme, toggleTheme } = useColor();
+
+  // Update all avialable recordings
+  const [recordings, setRecordings] = useState<string[]>([]);
+  const [showModalScreen, setShowModalScreen] = useState<boolean>(false);
+
+  // Function to fetch and list recordings
+  const fetchRecordings = async () => {
+    try {
+      // Read all files in the documentDirectory
+      if (FileSystem.documentDirectory) {
+        const files = await FileSystem.readDirectoryAsync(
+          FileSystem.documentDirectory
+        );
+        const audioFiles = files.filter((file) => file.endsWith(".wav")); // Filter out the .wav files
+        setRecordings(audioFiles); // Update the recordings state
+      } else {
+        console.warn("Document directory is not accessible.");
+      }
+    } catch (error) {
+      console.error("Error reading directory:", error);
+    }
+  };
+
+  // Delete all files
+  // const deleteAllFiles = async () => {
+  //   try {
+  //     // Get the list of all files in the document directory
+  //     const files = await FileSystem.readDirectoryAsync(
+  //       FileSystem.documentDirectory
+  //     );
+
+  //     // Iterate over each file and delete it
+  //     for (const file of files) {
+  //       const filePath = `${FileSystem.documentDirectory}${file}`;
+
+  //       // Delete the file
+  //       await FileSystem.deleteAsync(filePath);
+  //       console.log(`Deleted file: ${filePath}`);
+  //     }
+
+  //     console.log("All files have been deleted.");
+  //   } catch (error) {
+  //     console.error("Error deleting files:", error);
+  //   }
+  // };
+
+  // Get all files from AsyncStorage
+  const getAsyncStorageFiles = () => {
+    try {
+    } catch (error) {}
+  };
+  // Get all files on page load
+  useEffect(() => {
+    fetchRecordings();
+    // deleteAllFiles();
+  });
 
   return (
     <SafeAreaView
@@ -32,49 +97,45 @@ const index = () => {
         </View>
         <AddButton size={55} />
       </View>
-      <ScrollView
-        style={styles.scrollHolder}
-        showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.infoHolder}>
-          <Infolabels info="Total saved voice memo" amount={7} />
-          <Infolabels info="Total favorite voice memo" amount={0} />
-        </View>
+      {/* using Flat list type */}
 
-        {/* Memo list */}
-
-        <View style={styles.memoListHolder}>
-          <View
-            style={{
-              paddingBottom: 10,
-            }}
-          >
-            <Text
+      <FlatList
+        data={recordings}
+        style={{
+          paddingVertical: 15,
+        }}
+        keyExtractor={(item) => item}
+        renderItem={({ item }) => <Memos item={item} />}
+        ListHeaderComponent={(item) => (
+          <>
+            <View style={styles.infoHolder}>
+              <Infolabels
+                info="Total saved voice memo"
+                amount={recordings.length}
+              />
+              <Infolabels info="Total favorite voice memo" amount={0} />
+            </View>
+            <View
               style={{
-                fontFamily: "Causten-SemiBold",
-                fontSize: 20,
+                paddingBottom: 10,
               }}
             >
-              Memo List
-            </Text>
-          </View>
-
-          {/* Map all the momo components */}
-          <View
-            style={{
-              flex: 1,
-              gap: 5,
-            }}
-          >
-            <Memos />
-            <Memos />
-            <Memos />
-            <Memos />
-            <Memos />
-          </View>
-        </View>
-      </ScrollView>
+              <Text
+                style={{
+                  fontFamily: "Causten-SemiBold",
+                  fontSize: 20,
+                }}
+              >
+                Memo List
+              </Text>
+            </View>
+          </>
+        )}
+      />
+      {/* Modal screen logic */}
+      {/* {showModalScreen && (
+        <ModalScreen setShowModalScreen={setShowModalScreen} />
+      )} */}
     </SafeAreaView>
   );
 };

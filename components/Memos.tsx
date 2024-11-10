@@ -18,6 +18,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
+
 // Interfaces and types
 interface itemType {
   item: string;
@@ -28,6 +29,9 @@ interface playType {
   setPosition: any;
   currentPlaying: any;
   setIsCurrentPlaying: any;
+}
+interface deleteType {
+  fileUri: string;
 }
 
 // The play audio button components
@@ -114,7 +118,16 @@ const PlayButton: React.FC<playType> = ({
 };
 
 // The open options components
-const DeleteButton: React.FC = () => {
+const DeleteButton: React.FC<deleteType> = ({ fileUri }) => {
+  // Function delete file
+  const deleteFiles = async () => {
+    try {
+      await FileSystem.deleteAsync(fileUri);
+      Alert.alert("Success", "File deleted ");
+    } catch (error) {
+      Alert.alert("Error", "Error deleting memo");
+    }
+  };
   const { colors } = useColor();
   return (
     <TouchableOpacity
@@ -126,6 +139,7 @@ const DeleteButton: React.FC = () => {
         justifyContent: "center",
         alignItems: "center",
       }}
+      onPress={deleteFiles}
     >
       <Image
         source={icons.del}
@@ -285,7 +299,7 @@ const Memos: React.FC<itemType> = ({ item }) => {
           </View>
         )}
       </View>
-      <DeleteButton />
+      <DeleteButton fileUri={fileUri} />
     </View>
   );
 };

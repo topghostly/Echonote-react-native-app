@@ -4,6 +4,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import React, { memo, useEffect, useMemo, useState } from "react";
@@ -14,6 +15,7 @@ import AddButton from "@/components/AddButton";
 import Memos from "@/components/Memos";
 import * as FileSystem from "expo-file-system";
 import ModalScreen from "@/components/ModalScreen";
+import { router } from "expo-router";
 
 const index = () => {
   // Collect color values from context
@@ -107,6 +109,18 @@ const index = () => {
       {/* {showModalScreen && (
         <ModalScreen setShowModalScreen={setShowModalScreen} />
       )} */}
+
+      <TouchableOpacity
+        style={{
+          width: 60,
+          height: 60,
+
+          backgroundColor: "red",
+        }}
+        onPress={() => {
+          router.push("/auth");
+        }}
+      ></TouchableOpacity>
     </SafeAreaView>
   );
 };

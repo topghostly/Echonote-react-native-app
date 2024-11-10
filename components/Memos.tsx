@@ -205,17 +205,13 @@ const Memos: React.FC<itemType> = ({ item }) => {
   const { colors } = useColor(); // Get colors from context
   const { isPlaying, updateIsPlaying } = useUtil();
 
-  // Create amplitude rectangles
-
-  const ampRect = Array.from({ length: 30 });
-
   // Playback progress animation logic
   const progressPosition = useSharedValue(0);
 
   useEffect(() => {
     const newPosition = normalizeToRange(duration, position);
     if (!isNaN(newPosition)) {
-      progressPosition.value = withTiming(newPosition, { duration: 500 });
+      progressPosition.value = withTiming(newPosition, { duration: 800 });
     }
   }, [position, duration]);
 
@@ -224,6 +220,12 @@ const Memos: React.FC<itemType> = ({ item }) => {
       transform: [{ translateX: progressPosition.value || 0 }],
     };
   });
+
+  useEffect(() => {
+    if (!currentPlaying) {
+      progressPosition.value = 0;
+    }
+  }, [currentPlaying]);
   return (
     <View
       style={{
@@ -245,20 +247,9 @@ const Memos: React.FC<itemType> = ({ item }) => {
         setIsCurrentPlaying={setIsCurrentPlaying}
       />
       <View style={styles.infoBlock}>
-        {!currentPlaying ? (
+        {currentPlaying ? (
           // Logic for play progress
           <View style={styles.progressHolder}>
-            {/* <Animated.View
-              style={[
-                {
-                  width: 10,
-                  height: 10,
-                  backgroundColor: "white",
-                  borderRadius: 100,
-                },
-                progressStyle,
-              ]}
-            /> */}
             {amplitude.map((height, index) => (
               <View
                 key={index}
@@ -270,6 +261,18 @@ const Memos: React.FC<itemType> = ({ item }) => {
                 }}
               />
             ))}
+            <Animated.View
+              style={[
+                {
+                  width: 5,
+                  height: 20,
+                  backgroundColor: colors.primaryTwo,
+                  borderRadius: 100,
+                  position: "absolute",
+                },
+                progressStyle,
+              ]}
+            />
           </View>
         ) : (
           <View>

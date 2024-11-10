@@ -53,13 +53,13 @@ function RootLayoutNav() {
     <UtilProvider>
       <ColorProvider>
         <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen
-            name="auth"
+            name="index"
             options={{
               headerShown: false,
             }}
           />
+          <Stack.Screen name="main" options={{ headerShown: false }} />
           <Stack.Screen
             name="modal"
             options={{ presentation: "modal", headerShown: false }}

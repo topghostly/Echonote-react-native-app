@@ -306,7 +306,7 @@ export default function ModalScreen() {
               alignItems: "center",
             }}
             onPress={() => {
-              router.replace("/");
+              router.replace("/main");
             }}
           >
             <Image

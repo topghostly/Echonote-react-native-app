@@ -1,53 +1,68 @@
 import {
-  FlatList,
-  Image,
-  ScrollView,
+  Alert,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { memo, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useColor } from "@/context/ColorProvider";
-import Infolabels from "@/components/Infolabels";
-import AddButton from "@/components/AddButton";
-import Memos from "@/components/Memos";
-import * as FileSystem from "expo-file-system";
-import ModalScreen from "@/components/ModalScreen";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 
 const index = () => {
-  // Collect color values from context
-  const { colors, theme, toggleTheme } = useColor();
+  const { colors } = useColor(); // Get default colors
+  const [name, setName] = useState<string>("");
 
-  // Update all avialable recordings
-  const [recordings, setRecordings] = useState<string[]>([]);
-  const [showModalScreen, setShowModalScreen] = useState<boolean>(false);
-
-  // Function to fetch and list recordings
-  const fetchRecordings = async () => {
+  // Check for existing user
+  const checkUser = async () => {
     try {
-      // Read all files in the documentDirectory
-      if (FileSystem.documentDirectory) {
-        const files = await FileSystem.readDirectoryAsync(
-          FileSystem.documentDirectory
-        );
-        const audioFiles = files.filter((file) => file.endsWith(".wav")); // Filter out the .wav files
-        setRecordings(audioFiles); // Update the recordings state
-      } else {
-        console.warn("Document directory is not accessible.");
+      const existingUser = await AsyncStorage.getItem("userprofile");
+      if (existingUser) {
+        router.replace("/main");
       }
+      return;
     } catch (error) {
-      console.error("Error reading directory:", error);
+      console.log("Error while chackign user");
+      return;
     }
   };
 
-  // Get all files on page load
   useEffect(() => {
-    fetchRecordings();
-  });
+    console.log("Insode teh auth");
+    checkUser();
+  }, []);
 
+  const nameCheck = () => {
+    if (name.length <= 1) {
+      Alert.alert("Error", "Dude, why is your name a letter long");
+      return true;
+    }
+  };
+
+  const hamdleGetUserName = async () => {
+    try {
+      if (nameCheck()) {
+        return;
+      }
+
+      const userProfile = {
+        name: name,
+      };
+
+      const jsonUserProfile = JSON.stringify(userProfile);
+
+      const profile = await AsyncStorage.setItem(
+        "userprofile",
+        jsonUserProfile
+      );
+      router.replace("/main");
+    } catch (error) {
+      console.log("Error logging in user", error);
+    }
+  };
   return (
     <SafeAreaView
       style={{
@@ -56,71 +71,49 @@ const index = () => {
         paddingHorizontal: 10,
       }}
     >
-      <View style={styles.headerHolder}>
-        <View>
+      <View style={styles.head}>
+        <Text style={styles.logo}>EchoNote</Text>
+        <Text style={styles.hero}>Echo your thoughts effortlessly</Text>
+      </View>
+      <View style={styles.holder}>
+        <View style={styles.inputHolder}>
+          <TextInput
+            value={name}
+            onChangeText={(e: any) => {
+              setName(e);
+            }}
+            style={{
+              flex: 1,
+              color: "#656625",
+              fontFamily: "Causten-SemiBold",
+              fontSize: 35,
+              textAlign: "center",
+            }}
+            placeholder="Who goes there?"
+            placeholderTextColor={"#656625"}
+          />
+        </View>
+        <TouchableOpacity
+          style={{
+            width: 350,
+            height: 70,
+            backgroundColor: "white",
+            borderRadius: 100,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={hamdleGetUserName}
+        >
           <Text
             style={{
-              color: colors.text,
-              fontFamily: "Causten-Bold",
-              fontSize: 55,
+              fontFamily: "Causten-SemiBold",
+              fontSize: 25,
             }}
           >
-            Beaver
+            Lock it in!
           </Text>
-        </View>
-        <AddButton size={55} />
+        </TouchableOpacity>
       </View>
-      {/* using Flat list type */}
-
-      <FlatList
-        data={recordings}
-        style={{
-          paddingVertical: 15,
-        }}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => <Memos item={item} />}
-        ListHeaderComponent={(item) => (
-          <>
-            <View style={styles.infoHolder}>
-              <Infolabels
-                info="Total saved voice memo"
-                amount={recordings.length}
-              />
-              <Infolabels info="Total favorite voice memo" amount={0} />
-            </View>
-            <View
-              style={{
-                paddingBottom: 10,
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: "Causten-SemiBold",
-                  fontSize: 20,
-                }}
-              >
-                Memo List
-              </Text>
-            </View>
-          </>
-        )}
-      />
-      {/* Modal screen logic */}
-      {/* {showModalScreen && (
-        <ModalScreen setShowModalScreen={setShowModalScreen} />
-      )} */}
-
-      <TouchableOpacity
-        style={{
-          width: 60,
-          height: 60,
-
-          backgroundColor: "red",
-        }}
-        onPress={() => {
-          router.push("/auth");
-        }}
-      ></TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -128,26 +121,30 @@ const index = () => {
 export default index;
 
 const styles = StyleSheet.create({
-  scrollHolder: {
-    paddingTop: 10,
-  },
-
-  headerHolder: {
-    width: "100%",
-    justifyContent: "space-between",
-    flexDirection: "row",
-    paddingTop: 20,
-    paddingBottom: 10,
-  },
-
-  infoHolder: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  head: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 30,
     gap: 10,
-    paddingVertical: 15,
   },
-
-  memoListHolder: {
-    paddingVertical: 15,
+  logo: {
+    fontFamily: "Causten-Bold",
+    fontSize: 45,
+  },
+  hero: {
+    fontFamily: "Causten-Medium",
+    fontSize: 16,
+  },
+  holder: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
+  inputHolder: {
+    width: 350,
+    height: 70,
+    backgroundColor: "#B0B243",
+    borderRadius: 100,
   },
 });

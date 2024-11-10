@@ -176,13 +176,13 @@ const Memos: React.FC<itemType> = ({ item }) => {
 
       if (jsonData != null) {
         const memoData = JSON.parse(jsonData);
-        console.log(memoData);
-        setAmplitude(memoData);
+        setAmplitude(memoData.amplitude);
       } else {
         console.log("No data found");
+        Alert.alert("Error", "No amplitude data found");
       }
     } catch (error) {
-      Alert.alert("Error", "Couuld not hey amplitude details");
+      Alert.alert("Error", "Couuld not get amplitude details");
       console.error(error);
     }
   };
@@ -190,7 +190,7 @@ const Memos: React.FC<itemType> = ({ item }) => {
   //Get file details on page load
   useEffect(() => {
     getFileDetails();
-    // getAsyncDate();
+    getAsyncDate();
   }, []);
 
   const normalizeToRange = (normalizingFactor: any, testValue: number) => {
@@ -259,12 +259,12 @@ const Memos: React.FC<itemType> = ({ item }) => {
                 progressStyle,
               ]}
             /> */}
-            {ampRect.map((rabd, index) => (
+            {amplitude.map((height, index) => (
               <View
                 key={index}
                 style={{
                   width: 3,
-                  height: 30,
+                  height: height / 10,
                   backgroundColor: "white",
                   borderRadius: 100,
                 }}

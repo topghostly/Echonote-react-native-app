@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
   SafeAreaView,
+  Alert,
 } from "react-native";
 import { useColor } from "@/context/ColorProvider";
 import icons from "@/constants/icons";
@@ -14,7 +15,6 @@ import { useState, useEffect, useRef } from "react";
 import AudioRecord from "react-native-audio-record";
 import { PermissionsAndroid } from "react-native";
 import { Buffer } from "buffer";
-// import * as FileSystem from "expo-file-system";
 import { router } from "expo-router";
 import Animated, {
   useSharedValue,
@@ -22,6 +22,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { throttle } from "lodash";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ModalScreen() {
   const { colors } = useColor(); // Grab color from context provider
@@ -73,9 +74,7 @@ export default function ModalScreen() {
     requestMicrophonePermission();
   }, []);
 
-  // const AUDIO_FILE_PATH = `${FileSystem.documentDirectory}/new/filename.wav`;
-
-  // Normalise Audio outut amplitude
+  // Normalise Audio output amplitude for counter
   const normalize = (
     value: number,
     min = 0,
@@ -88,6 +87,7 @@ export default function ModalScreen() {
     );
   };
 
+  // use Throttle for counter amplitude
   const updateAmplituedThrottled = throttle((currentAmplitude: number) => {
     setAmplitude(currentAmplitude);
   }, 300);
@@ -96,12 +96,13 @@ export default function ModalScreen() {
     setAmplitudeArray([]);
     setAmplitude(5);
     setCounterArray([5, 5, 5, 5]);
+
     // Configure AudioRecord
     AudioRecord.init({
-      sampleRate: 16000, // Audio frequency (adjust as needed)
-      channels: 1, // Mono channel
+      sampleRate: 16000,
+      channels: 1,
       bitsPerSample: 16,
-      audioSource: 6, // Microphone
+      audioSource: 6,
       wavFile: `${audioName}`,
     });
 
@@ -121,10 +122,14 @@ export default function ModalScreen() {
       setIsRecording(false);
     }
   };
+
+  // Make initial height values for all counter block
   const animatedHeight1 = useSharedValue(5); // animation height default value
   const animatedHeight2 = useSharedValue(5); // animation height default value
   const animatedHeight3 = useSharedValue(5); // animation height default value
   const animatedHeight4 = useSharedValue(5); // animation height default value
+
+  // Update height value for counter block
   useEffect(() => {
     animatedHeight1.value = withTiming(counterArray[0], { duration: 200 });
     animatedHeight2.value = withTiming(counterArray[1], { duration: 200 });
@@ -163,11 +168,29 @@ export default function ModalScreen() {
     };
   });
 
+  const handleAsyncDataStorage = async (amplitude: number[]) => {
+    try {
+      const memoData = {
+        amplitude,
+      };
+
+      // Convert data to JSON form to make out lives easier
+      const jsonData = JSON.stringify(memoData);
+
+      await AsyncStorage.setItem(`memo_${audioName}`, jsonData);
+
+      Alert.alert("Success", "Memo saved successfully");
+    } catch (error: any) {
+      Alert.alert("Error", error);
+    }
+  };
+
   // Function to stop recording
   const stopRecording = async () => {
     try {
       setIsRecording(false);
       const uri = await AudioRecord.stop(); // Stop recording and store the uri
+      await handleAsyncDataStorage(amplitudeArray);
       console.log("Recording stopped. File URI:", uri);
       setAmplitude(5);
       setCounterArray([5, 5, 5, 5]);

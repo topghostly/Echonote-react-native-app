@@ -9,7 +9,6 @@ import {
 import React, { memo, useEffect, useMemo, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useColor } from "@/context/ColorProvider";
-import icons from "@/constants/icons";
 import Infolabels from "@/components/Infolabels";
 import AddButton from "@/components/AddButton";
 import Memos from "@/components/Memos";
@@ -65,6 +64,11 @@ const index = () => {
   //   }
   // };
 
+  // Get all files from AsyncStorage
+  const getAsyncStorageFiles = () => {
+    try {
+    } catch (error) {}
+  };
   // Get all files on page load
   useEffect(() => {
     fetchRecordings();

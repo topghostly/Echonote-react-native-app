@@ -114,7 +114,7 @@ const PlayButton: React.FC<playType> = ({
 };
 
 // The open options components
-const OptionsButton: React.FC = () => {
+const DeleteButton: React.FC = () => {
   const { colors } = useColor();
   return (
     <TouchableOpacity
@@ -128,7 +128,7 @@ const OptionsButton: React.FC = () => {
       }}
     >
       <Image
-        source={icons.options}
+        source={icons.del}
         style={{
           width: 30,
           height: 30,
@@ -285,7 +285,7 @@ const Memos: React.FC<itemType> = ({ item }) => {
           </View>
         )}
       </View>
-      <OptionsButton />
+      <DeleteButton />
     </View>
   );
 };

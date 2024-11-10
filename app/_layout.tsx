@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
+import { LogBox } from "react-native";
 // import the context files
 import { ColorProvider } from "@/context/ColorProvider";
 import { UtilProvider } from "@/context/UtilProvider";
@@ -22,6 +23,12 @@ export default function RootLayout() {
     "Causten-SemiBold": require("../assets/fonts/Causten-SemiBold.otf"),
     "Causten-Bold": require("../assets/fonts/Causten-Bold.otf"),
   });
+
+  // Ignore uselesssss messages
+  LogBox.ignoreLogs([
+    "`new NativeEventEmitter()` was called with a non-null argument without the required `addListener` method.",
+    "`new NativeEventEmitter()` was called with a non-null argument without the required `removeListeners` method.",
+  ]);
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {

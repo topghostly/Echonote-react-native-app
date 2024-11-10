@@ -4,4 +4,6 @@ import options from "../assets/images/options.png";
 import check from "../assets/images/check.png";
 import mic from "../assets/images/mic.png";
 import stopPlay from "../assets/images/stop-play.png";
-export default { add, play, options, check, mic, stopPlay };
+import del from "../assets/images/delete.png";
+
+export default { add, play, options, check, mic, stopPlay, del };

@@ -12,7 +12,7 @@ interface modalType {
 
 const ModalScreen: React.FC<modalType> = ({ setShowModalScreen }) => {
   const bottomSheetRef = useRef(null);
-  const snapPoints = useMemo(() => ["35%", "43%", "100%"]);
+  // const snapPoints = useMemo(() => ["35%", "43%", "100%"]);
 
   //   const renderBackDrop = useCallback((props) => [
   //     <BottomSheetBackdrop
@@ -25,7 +25,7 @@ const ModalScreen: React.FC<modalType> = ({ setShowModalScreen }) => {
     <BottomSheet
       index={1}
       ref={bottomSheetRef}
-      snapPoints={snapPoints}
+      // snapPoints={snapPoints}
       enablePanDownToClose={true}
       onClose={() => {
         setShowModalScreen(false);

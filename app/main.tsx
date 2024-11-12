@@ -25,7 +25,18 @@ const main = () => {
   // Update all avialable recordings
   const [recordings, setRecordings] = useState<string[]>([]);
   const [showModalScreen, setShowModalScreen] = useState<boolean>(false);
-  const [userName, setUserName] = useState<string>(() => {});
+  const [userName, setUserName] = useState<any>("");
+
+  // Function to get the username from the asyncStorage
+  const getUserName = async () => {
+    const userprofile = await AsyncStorage.getItem("userprofile");
+
+    if (userprofile) {
+      const user = JSON.parse(userprofile);
+      return setUserName(user?.name || "Dude");
+    }
+    return setUserName("Dude");
+  };
 
   // Function to fetch and list recordings
   const fetchRecordings = async () => {
@@ -48,6 +59,7 @@ const main = () => {
   // Get all files on page load
   useEffect(() => {
     // checkUser();
+    getUserName();
     fetchRecordings();
   });
 
@@ -68,7 +80,7 @@ const main = () => {
               fontSize: 55,
             }}
           >
-            Beaver
+            {userName}
           </Text>
         </View>
         <AddButton size={55} />

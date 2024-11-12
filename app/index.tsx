@@ -31,7 +31,6 @@ const index = () => {
   };
 
   useEffect(() => {
-    console.log("Insode teh auth");
     checkUser();
   }, []);
 

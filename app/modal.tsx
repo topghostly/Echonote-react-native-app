@@ -38,7 +38,6 @@ export default function ModalScreen() {
   const [audioName, setAudioName] = useState<String>(() => {
     const randNum = Math.floor(Math.random() * 100000) + 1;
     const newName = "MEMO_" + randNum.toString() + ".wav";
-    console.log(newName);
     return newName;
   });
   // Calculate the amplitude from the buffer
@@ -178,15 +177,12 @@ export default function ModalScreen() {
       const jsonData = JSON.stringify(memoData);
 
       await AsyncStorage.setItem(`memo_${audioName}`, jsonData);
-
-      Alert.alert("Success", "Memo saved successfully");
     } catch (error: any) {
       Alert.alert("Error", error);
     }
   };
 
   const reduceToThirty = (array: number[]) => {
-    console.log("Reducing");
     let index = 1; // Start by removing the second element
     while (array.length > 30) {
       array.splice(index, 1); // Remove the element at the current index
@@ -200,7 +196,6 @@ export default function ModalScreen() {
   };
 
   const expandToThirty = (array: number[]) => {
-    console.log("increasing");
     let index = 0; // Start with the first element
     while (array.length < 30) {
       array.splice(index + 1, 0, array[index]); // Insert a duplicate of the current element
@@ -215,16 +210,12 @@ export default function ModalScreen() {
 
   // Normalise amplitude array
   const normaliseArray = (amplitudeArray: number[]) => {
-    console.log(amplitudeArray.length);
     let normalisedArray: number[] = [];
     if (amplitudeArray.length > 30) {
-      console.log("Reducing");
       normalisedArray = reduceToThirty(amplitudeArray);
     } else if (amplitudeArray.length < 30) {
-      console.log("Increasing");
       normalisedArray = expandToThirty(amplitudeArray);
     } else if (amplitudeArray.length === 30) {
-      console.log("Leaving as is");
       normalisedArray = amplitudeArray;
     }
 
@@ -238,10 +229,8 @@ export default function ModalScreen() {
       const uri = await AudioRecord.stop(); // Stop recording and store the uri
       const newArray = normaliseArray(amplitudeArray);
       await handleAsyncDataStorage(newArray);
-      console.log("Recording stopped. File URI:", uri);
       setAmplitude(5);
       setCounterArray([5, 5, 5, 5]);
-      console.log(amplitudeArray);
     } catch (error) {
       console.error("Error stopping recording:", error);
       setAmplitude(5);
@@ -274,11 +263,9 @@ export default function ModalScreen() {
     if (isRecording) {
       stopRecording();
       setCounterArray([5, 5, 5, 5]);
-      console.log("Recording stopped");
     }
     if (!isRecording) {
       startRecording();
-      console.log("Recording started");
     }
   };
 
@@ -306,6 +293,7 @@ export default function ModalScreen() {
               alignItems: "center",
             }}
             onPress={() => {
+              Alert.alert("Success", "Memo saved successfully");
               router.replace("/main");
             }}
           >

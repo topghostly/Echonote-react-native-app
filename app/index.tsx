@@ -85,10 +85,10 @@ const index = () => {
               flex: 1,
               color: "#656625",
               fontFamily: "Causten-SemiBold",
-              fontSize: 35,
+              fontSize: 30,
               textAlign: "center",
             }}
-            placeholder="Who goes there?"
+            placeholder="What should we call you?"
             placeholderTextColor={"#656625"}
           />
         </View>
